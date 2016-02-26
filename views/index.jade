@@ -1,0 +1,11 @@
+if(users)
+    ul
+      li
+        img(src="#{users.photo}")
+      li Bienvenido #{users.name}
+      li
+        a(href='logout') Salir
+else
+    ul
+      li
+        a(href='auth/facebook') Login con Facebook

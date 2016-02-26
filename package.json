@@ -1,0 +1,21 @@
+{
+  "name": "application-name",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "bcrypt-nodejs": "0.0.3",
+    "body-parser": "^1.15.0",
+    "express": "3.2.6",
+    "jade": "*",
+    "mongoose": "^4.4.5",
+    "passport-facebook": "2.1.0",
+    "passport": "0.3.2",
+    "passport-local" : "~0.1.6", 	
+    "passport-google-oauth" : "~0.1.5",
+    "connect-flash" : "~0.1.1", 	
+    "bcrypt-nodejs" : "latest" 	
+  }
+}
