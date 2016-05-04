@@ -1,6 +1,7 @@
-var mongoose = require('mongoose'),
-    Schema = mongoose.Schema,
-    bcrypt   = require('bcrypt-nodejs');
+// app/models/user.js
+// load the things we need
+var mongoose = require('mongoose');
+var bcrypt   = require('bcrypt-nodejs');
 
 // define the schema for our user model
 var userSchema = mongoose.Schema({
@@ -10,24 +11,24 @@ var userSchema = mongoose.Schema({
         password     : String,
     },
     facebook         : {
-        oauthid      : String,
+        id           : String,
+        token        : String,
         email        : String,
-        name         : String,
-        createAt     : Date
+        name         : String
     },
     twitter          : {
-        oauthid      : String,
+        id           : String,
+        token        : String,
         displayName  : String,
-        username     : String,
-        createAt     : Date
+        username     : String
     },
     google           : {
-        oauthid      : String,
+        id           : String,
+        token        : String,
         email        : String,
-        name         : String,
-        createAt     : Date
-    },
-    photo            : String
+        name         : String
+    }
+
 });
 
 // methods ======================
