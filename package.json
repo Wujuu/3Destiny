@@ -1,21 +1,22 @@
 {
-  "name": "application-name",
+  "name": "3Destiny",
   "version": "0.0.1",
   "private": true,
   "scripts": {
     "start": "node app.js"
   },
   "dependencies": {
-    "bcrypt-nodejs": "0.0.3",
+    "bcrypt-nodejs": "latest",
     "body-parser": "^1.15.0",
+    "connect-flash": "~0.1.1",
     "express": "3.2.6",
     "jade": "*",
     "mongoose": "^4.4.5",
-    "passport-facebook": "2.1.0",
+    "multer": "^1.1.0",
     "passport": "0.3.2",
-    "passport-local" : "~0.1.6", 	
-    "passport-google-oauth" : "~0.1.5",
-    "connect-flash" : "~0.1.1", 	
-    "bcrypt-nodejs" : "latest" 	
+    "passport-facebook": "2.1.0",
+    "passport-google-oauth": "~0.1.5",
+    "passport-local": "~0.1.6",
+    "require-all": "^2.0.0"
   }
 }

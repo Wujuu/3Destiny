@@ -8,4 +8,13 @@ if(users)
 else
     ul
       li
+        a(href='auth/twitter') Login con Twitter
+      li
         a(href='auth/facebook') Login con Facebook
+      li
+        form(action='/auth/signup',method='post')
+          label(for='email') Email
+          input(id='email', name='email', type='text', placeholder='Ingresa el email')
+          label(for='pass') Password
+          input(id='pass', name='pass', type='text', placeholder='Ingresa el email')
+          input(type="submit")

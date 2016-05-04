@@ -11,12 +11,13 @@ var express = require('express'),
     config = require("./config/config.js"),
     mongoose = require('mongoose'),
     flash = require('connect-flash'),
+    multer = require('multer'),
     // models
-    User = require('./app/models/user').User;
+    User = require("./app/models/user");
     
 // config
 mongoose.connect(config.db.url);
-require('./config/passport')(passport);    
+require('./config/passport')(passport, User);    
 
 app.set('port', process.env.PORT || 3000);
 app.set('views', __dirname + '/views');
@@ -40,13 +41,13 @@ app.configure(function() {
 });
 
 // routes ======================================================================
-require('./app/routes.js')(app, passport);
-
+require('./app/routes/user.js')(app, passport);
 // launch ======================================================================
-app.listen(config.app.port);
-console.log('The magic happens on port ' + config.app.port);
+app.listen(process.env.PORT, process.env.IP, function() {
+    console.log("STARTED");
+});
 
-// Manejo de sessiones
+// Manejo de sessiones 
 app.get('/ejemplo', function(req, res){
     if(req.session.nombre){
         res.send('Hola ' + req.session.nombre);

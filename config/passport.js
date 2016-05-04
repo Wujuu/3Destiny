@@ -1,10 +1,10 @@
-var mongoose = require('mongoose')
-, User = require('../app/models/user').User;
-var config = require('./config');
-var FacebookStrategy = require('passport-facebook').Strategy;
-
-module.exports = function(passport) {
+var mongoose = require('mongoose'),
+    config = require('./config'),
+    FacebookStrategy = require('passport-facebook').Strategy,
+    LocalStrategy   = require('passport-local').Strategy;
     
+
+module.exports = function(passport, User) {
     // used to serialize the user for the session
     passport.serializeUser(function(user, done) {
         done(null, user.id);
@@ -27,7 +27,7 @@ module.exports = function(passport) {
         User.findOne({ 'local.email' :  email }, function(err, user) {
             if (err) return done(err);
             if (user) {
-                return done(null, false, req.flash('signupMessage', 'That email is already taken.'));
+                return done(null, false, { message: 'That email is already taken.'});
             } else {
 				// if there is no user with that email
                 // create the user
@@ -46,39 +46,41 @@ module.exports = function(passport) {
 
     passport.use('local-login', new LocalStrategy({
         // by default, local strategy uses username and password, we will override with email
-        usernameField : 'email',
-        passwordField : 'password',
+        usernameField : '',
+        passwordField : '',
         passReqToCallback : true // allows us to pass back the entire request to the callback
     },
     function(req, email, password, done) { // callback with email and password from our form
-        User.findOne({ 'local.email' :  email }, function(err, user) {
-            if (err) return done(err);
-            // if no user is found, return the message
-            if (!user)
-                return done(null, false, req.flash('loginMessage', 'No user found.')); // req.flash is the way to set flashdata using connect-flash
-            if (!user.validPassword(password))
-                return done(null, false, req.flash('loginMessage', 'Oops! Wrong password.')); // create the loginMessage and save it to session as flashdata
+        User.findOne({"local.email" :  email }, function(err, user) {
+            if (err) { return done(err); }
+            if (!user) {
+              return done(null, false, { message: 'Unknown user' });
+            }
+            if (!user.authenticate(password)) {
+              return done(null, false, { message: 'Invalid password' });
+            }
             return done(null, user);
         });
     }));
     
-    passport.use(new FacebookStrategy({
+    passport.use("facebook",new FacebookStrategy({
         clientID: config.facebook.id,
         clientSecret: config.facebook.secret,
         callbackURL: config.facebook.callbackURL,
         profileFields: ['id', 'emails', 'gender', 'link', 'locale', 'name', 'timezone', 'updated_time', 'verified','photos']
     }, function(accessToken, refreshToken, profile, done) {
-        User.findOne({provider_id: profile.id}, function(err, user) {
+        User.findOne({"facebook.oauthid": profile.id}, function(err, user) {
             if(err) throw(err);
             if(!err && user!= null) return done(null, user);
         
-            var newUser = new User({
-                provider_id: profile.id,
-                provider: profile.provider,
-                name: profile.displayName,
-                email: profile.emails[0].value,
-                photo: profile.photos[0].value
-            });
+            var newUser = new User();
+                newUser.facebook.oauthid = profile.id;
+                newUser.facebook.createAt = Date.now();
+                if(profile.emails && profile.emails.length>0){
+                    newUser.facebook.email = profile.emails[0].value;    
+                }
+                newUser.facebook.name = profile.name.givenName+profile.name.familyName;
+                newUser.photo = profile.photos[0].value;
             newUser.save(function(err) {
                 if(err) throw err;
                 done(null, newUser);
@@ -86,18 +88,4 @@ module.exports = function(passport) {
         });
     }));
 };
-
-// config/passport.js
-
-// load all the things we need
-var LocalStrategy   = require('passport-local').Strategy;
-
-// load up the user model
-var User       		= require('../app/models/user');
-
-// expose this function to our app using module.exports
-module.exports = function(passport) {
-
-	
-
-};
+ 
