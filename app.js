@@ -11,9 +11,10 @@ var bodyParser = require('body-parser'),
     config = require("./config/config.js")[env],
     mongoose = require('mongoose');
     
+require('./config/passport')(passport, config);
     
 // Models
-var User = require("./models/user");
+var User = require("./app/models/user");
 
 mongoose.connect(config.db.url);
 
@@ -21,7 +22,7 @@ var app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+app.set('view engine', 'ejs'); // set up ejs for templating
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -33,13 +34,19 @@ app.use(require('less-middleware')(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // required for passport
-app.use(session({ secret: 'ilovescotchscotchyscotchscotch' })); // session secret
+app.use(session({
+    secret: 'ilovescotchscotchyscotchscotch',
+    name: 'session',
+    proxy: true,
+    resave: true,
+    saveUninitialized: true
+}));
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
 app.use(flash()); // use connect-flash for flash messages stored in session
 
-require('./routes/index.js')(app, passport);
-require('./routes/users.js')(app, passport);
+require('./app/routes.js')(app, passport);
+//require('./routes/users.js')(app, passport);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -55,7 +62,7 @@ app.use(function(req, res, next) {
 if (app.get('env') === 'development') {
   app.use(function(err, req, res, next) {
     res.status(err.status || 500);
-    res.render('error', {
+    res.render('error.ejs', {
       message: err.message,
       error: err
     });
@@ -66,7 +73,7 @@ if (app.get('env') === 'development') {
 // no stacktraces leaked to user
 app.use(function(err, req, res, next) {
   res.status(err.status || 500);
-  res.render('error', {
+  res.render('error.ejs', {
     message: err.message,
     error: {}
   });
