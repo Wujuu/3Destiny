@@ -1,0 +1,56 @@
+<!-- views/signup.ejs -->
+<!doctype html>
+<html>
+<head>
+    <title>Node Authentication</title>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css"> <!-- load bootstrap css -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css"> <!-- load fontawesome -->
+    <style>
+        body        { padding-top:80px; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+<div class="col-sm-6 col-sm-offset-3">
+
+    <h1><span class="fa fa-sign-in"></span> Crea tu RA!</h1>
+
+    <!-- show any messages that come back with authentication -->
+    <% if (message.length > 0) { %>
+        <div class="alert alert-danger"><%= message %></div>
+    <% } %>
+
+    <!-- LOGIN FORM -->
+    <form action="/ra/" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+            <label>Tipo</label>
+            <select class="form-control" name="tipo">
+                <option value="img">Imagen</option>
+                <option value="video">Video</option>
+                <option value="3d">3D</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Archivo</label>
+            <input type="file" class="form-control" name="archivo">
+        </div>
+        <div class="form-group">
+            <label>Patron</label>
+            <input type="file" class="form-control" name="patron">
+        </div>
+        
+        
+        <button type="submit" class="btn btn-warning btn-lg">Signup</button>
+    </form>
+
+    <hr>
+
+    <a href="/ra/">All RA</a>
+    <p>Or go <a href="/Profile">Profile</a>.</p>
+
+</div>
+
+</div>
+</body>
+</html>

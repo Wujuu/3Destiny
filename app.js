@@ -12,9 +12,6 @@ var bodyParser = require('body-parser'),
     mongoose = require('mongoose');
     
 require('./config/passport')(passport, config);
-    
-// Models
-var User = require("./app/models/user");
 
 mongoose.connect(config.db.url);
 

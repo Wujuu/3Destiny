@@ -1,8 +1,10 @@
 // app/models/user.js
 // load the things we need
 var mongoose = require('mongoose');
-var bcrypt   = require('bcrypt-nodejs');
+var bcrypt   = require('bcrypt-nodejs'),
+    autoIncrement = require('mongoose-auto-increment');
 
+autoIncrement.initialize(mongoose.connection);
 // define the schema for our user model
 var userSchema = mongoose.Schema({
 
@@ -41,6 +43,6 @@ userSchema.methods.generateHash = function(password) {
 userSchema.methods.validPassword = function(password) {
     return bcrypt.compareSync(password, this.local.password);
 };
-
+userSchema.plugin(autoIncrement.plugin, 'User');
 // create the model for users and expose it to our app
 module.exports = mongoose.model('User', userSchema);
