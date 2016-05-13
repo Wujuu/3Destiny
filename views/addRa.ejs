@@ -10,47 +10,81 @@
     </style>
 </head>
 <body>
-<div class="container">
+    <div class="container">
+        <div class="col-sm-6 col-sm-offset-3">
+            
+            <!-- show any messages that come back with authentication -->
+            <% if (message.length > 0) { %>
+                <div class="alert alert-danger"><%= message %></div>
+            <% } %>
+            <% if (ra) { %>
+                <h1><span class="fa fa-sign-in"></span> Modifica tu RA!</h1>
+                <form action="/ra/edit" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label>Tipo</label>
+                        <select class="form-control" name="tipo">
+                            <option value="img">Imagen</option>
+                            <option value="video">Video</option>
+                            <option value="3d">3D</option>
+                        </select>
+                    </div>
+                    <script type="text/javascript">
+                        var a = document.querySelector("select option[value='<%=ra.tipo %>]'");
+                        a.selected=true
+                    </script>
+                    <div class="form-group">
+                        <label>Archivo</label>
+                        <input type="text" value="<%= ra.archivo%>">
+                        <input type="file" class="form-control" name="archivo">
+                    </div>
+                    <div class="form-group">
+                        <label>Patron</label>
+                        <img src="/images/patron/<%= ra.patron%>.jpg">
+                        <input type="file" class="form-control" name="patron">
+                    </div>
+                    <input type="text" value="<%= ra._id%>" hidden name="id">
+                    
+                    <button type="submit" class="btn btn-warning btn-lg">Modificar</button>
+                </form>
 
-<div class="col-sm-6 col-sm-offset-3">
+                <hr>
 
-    <h1><span class="fa fa-sign-in"></span> Crea tu RA!</h1>
+                <a href="/ra/">All RA</a>
+                <p>Or go <a href="/Profile">Profile</a>.</p>
 
-    <!-- show any messages that come back with authentication -->
-    <% if (message.length > 0) { %>
-        <div class="alert alert-danger"><%= message %></div>
-    <% } %>
+            <% }else { %>
+                <!-- LOGIN FORM -->
+                <h1><span class="fa fa-sign-in"></span> Crea tu RA!</h1>
 
-    <!-- LOGIN FORM -->
-    <form action="/ra/" method="post" enctype="multipart/form-data">
-        <div class="form-group">
-            <label>Tipo</label>
-            <select class="form-control" name="tipo">
-                <option value="img">Imagen</option>
-                <option value="video">Video</option>
-                <option value="3d">3D</option>
-            </select>
+                <form action="/ra/add" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label>Tipo</label>
+                        <select class="form-control" name="tipo">
+                            <option value="img">Imagen</option>
+                            <option value="video">Video</option>
+                            <option value="3d">3D</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Archivo</label>
+                        <input type="file" class="form-control" name="archivo">
+                    </div>
+                    <div class="form-group">
+                        <label>Patron</label>
+                        <input type="file" class="form-control" name="patron">
+                    </div>
+                    
+                    
+                    <button type="submit" class="btn btn-warning btn-lg">Crear</button>
+                </form>
+
+                <hr>
+
+                <a href="/ra/">All RA</a>
+                <p>Or go <a href="/Profile">Profile</a>.</p>
+            <% } %>
         </div>
-        <div class="form-group">
-            <label>Archivo</label>
-            <input type="file" class="form-control" name="archivo">
-        </div>
-        <div class="form-group">
-            <label>Patron</label>
-            <input type="file" class="form-control" name="patron">
-        </div>
-        
-        
-        <button type="submit" class="btn btn-warning btn-lg">Signup</button>
-    </form>
 
-    <hr>
-
-    <a href="/ra/">All RA</a>
-    <p>Or go <a href="/Profile">Profile</a>.</p>
-
-</div>
-
-</div>
+    </div>
 </body>
 </html>

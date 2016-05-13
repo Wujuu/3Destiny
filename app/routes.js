@@ -196,7 +196,7 @@ module.exports = function(app, passport) {
         });
     });
 
-    app.get('/ra/:id', isLoggedIn, function(req, res, next){
+    app.get('/ra/:id/', isLoggedIn, function(req, res, next){
         if(isNaN(req.params.id)){
             return next();
         }
@@ -214,6 +214,29 @@ module.exports = function(app, passport) {
             });
         });
     });
+
+    app.get('/ra/:id/edit', isLoggedIn, function(req, res, next) {
+        Ra.findOne({'_id':req.params.id, 'userId' : req.user._id}, function(err, ra) {
+            // if there are any errors, return the error
+            if (err)
+                return res.render('error.ejs', { message: err.message });
+            
+            if(!ra){
+                res.render('addRa.ejs', { message: "No existe dicha RA en tu galeria." });
+            }
+            res.render('addRa.ejs', { message: req.flash('addRaMessage'), 'ra':ra });
+        });
+    });
+
+    app.get('/ra/:id/remove'){
+        Ra.remove({'_id':req.params.id, 'userId' : req.user._id}, function(err) {
+            // if there are any errors, return the error
+            if (err)
+                return res.render('error.ejs', { message: err.message });
+        
+            res.redirect('/ra/');
+        });
+    };
  
     app.get('/ra/', isLoggedIn, function(req, res){
         Ra.find({'userId' : req.user._id}, function(err, ras) {
@@ -230,21 +253,18 @@ module.exports = function(app, passport) {
                 message : ''
             });
         });
-    }).post('/ra/', isLoggedIn, addRaV, upload.fields([{ name: 'archivo'}, { name: 'patron'}]), function(req, res, next){
+    });
+    
+    app.get('/ra/add/', isLoggedIn, function(req, res) {
+        res.render('addRa.ejs', { message: req.flash('addRaMessage') });
+    }).post('/ra/add', isLoggedIn, addRaV, upload.fields([{ name: 'archivo'}, { name: 'patron'}]), function(req, res, next){
         var newRa = new Ra();
         try{
-            // Guardo el patron en la carpeta patron.
-            fs.createReadStream(req.files['patron'][0].path).pipe(fs.createWriteStream('../ra/patron/'+req.files['patron'][0].filename));
-            fs.createReadStream(req.files['patron'][0].path).pipe(fs.createWriteStream('../ra/patron/thumb/'+req.files['patron'][0].filename));
-            fs.createReadStream(req.files['patron'][0].path).pipe(fs.createWriteStream('../public/images/patron/'+req.files['patron'][0].filename+".jpg"));
-            fs.unlink(req.files['patron'][0].path);
+            crearPatron(req.files['patron'][0]);
             newRa.patron = req.files['patron'][0].filename;
             
             if(req.body.tipo != "video"){
-                // Lo guardo en su carpeta correspondiente.
-                fs.createReadStream(req.files['archivo'][0].path).pipe(fs.createWriteStream('../ra/'+req.body.tipo+'/'+req.files['archivo'][0].filename));
-                fs.createReadStream(req.files['archivo'][0].path).pipe(fs.createWriteStream('../ra/'+req.body.tipo+'/thumb/'+req.files['archivo'][0].filename));
-                fs.unlink(req.files['archivo'][0].path);
+                crearRAImage(req.files['archivo'][0].filename);
                 newRa.ruta = req.files['archivo'][0].filename;
                 
             }else{
@@ -268,10 +288,44 @@ module.exports = function(app, passport) {
             return next(e);
         }
        
-    });
-    
-    app.get('/ra/add/', isLoggedIn, function(req, res) {
-        res.render('addRa.ejs', { message: req.flash('addRaMessage') });
+    }).post('/ra/edit', isLoggedIn, editRAV, upload.fields([{ name: 'archivo'}, { name: 'patron'}]), function(req, res, next){
+        Ra.find({'_id' : req.body.id}, function(err, ra) {
+            try{
+                if(req.files['patron'][0])
+                {
+                    fs.unlink('../ra/patron/'+ra.patron);
+                    fs.unlink('../ra/patron/thumb/'+ra.patron);
+                    fs.unlink('../public/images/patron/'+ra.patron+".jpg");
+                    crearPatron(req.files['patron'][0]);
+                    ra.patron = req.files['patron'][0].filename;
+                }
+                if(req.body.tipo != "video")
+                {
+                    if(req.files['archivo'][0])
+                    {
+                        fs.unlink('../ra/'+ra.tipo+'/'+ra.ruta) 
+                        fs.unlink('../ra/'+ra.tipo+'/thumb/'+ra.ruta)
+                        crearRAImage(req.files['archivo'][0]);
+                        ra.ruta = req.files['archivo'][0].filename;
+                    }
+                }
+                else
+                {
+                    ra.ruta = req.body.archivo;
+                }    
+                
+                ra.tipo = req.body.tipo;
+                ra.userId = req.user._id;
+                ra.save(function(err) {
+                    if (err)
+                        return res.render('error.ejs', { message: err.message });
+                    
+                     res.redirect("/ra/"+ra._id);
+                });
+            }catch(e){
+                return next(e);
+            }
+        });
     });
 
 };
@@ -285,17 +339,59 @@ function isLoggedIn(req, res, next) {
 }
 
 // route middleware to valid data
-function addRaV(req,res,next){
+function addRAV(req,res,next){
     if(req.body.tipo)
     {
         if(req.body.tipo == "video"){
-            if(!validUrl.isWebUri(req.body.ruta))
-            {
-                req.flash('message', 'Url de video invalida');
+            youtube.validateUrl(req.body.archivo, function(res, err, next) {
+                if(err)
+                {
+                    req.flash('message', 'Url de video invalida');
+                    res.redirect('/ra/add');
+                }                
+            });
+            
+        }else{
+            if(!req.files['patron'][0] || if(req.files['archivo'][0])){
+                req.flash('message', 'Por favor cargue algun archivo en RA y Patron');
                 res.redirect('/ra/add');
-            }    
+            }
         }
         
     }
     return next();
+}
+
+// route middleware to valid data
+function editRAV(req,res,next){
+    if(req.body.tipo)
+    {
+        if(req.body.tipo == "video"){
+            youtube.validateUrl(req.body.archivo, function(res, err, next) {
+                if(err)
+                {
+                    req.flash('message', 'Url de video invalida');
+                    res.redirect('/ra/add');
+                }                
+            });
+            
+        }
+        
+    }
+    return next();
+}
+
+function crearPatron(file) {
+    // Guardo el patron en la carpeta patron.
+    fs.createReadStream(file.path).pipe(fs.createWriteStream('../ra/patron/'+file.filename));
+    fs.createReadStream(file.path).pipe(fs.createWriteStream('../ra/patron/thumb/'+file.filename));
+    fs.createReadStream(file.path).pipe(fs.createWriteStream('../public/images/patron/'+file.filename+".jpg"));
+    fs.unlink(file.path);
+}
+
+function crearRAImage(file) {
+    // Lo guardo en su carpeta correspondiente.
+    fs.createReadStream(file.path).pipe(fs.createWriteStream('../ra/'+req.body.tipo+'/'+file.filename));
+    fs.createReadStream(file.path).pipe(fs.createWriteStream('../ra/'+req.body.tipo+'/thumb/'+file.filename));
+    fs.unlink(file.path);
 }
