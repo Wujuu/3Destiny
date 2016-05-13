@@ -17,10 +17,10 @@
     <h1><span class=""></span>RA</h1>
 
     <!-- show any messages that come back with authentication -->
-    <% if (message.length > 0) { %>
+    <% if (this.message && message.length > 0) { %>
         <div class="alert alert-danger"><%= message %></div>
-    <% }else{ %>
-        <% if (ra._id) { %>
+    <% }%>
+    <% if (this.ra) { %>
             <p>
                 <strong>id</strong>: <%= ra._id %><br>
                 <strong>tipo</strong>: <%= ra.tipo %><br>

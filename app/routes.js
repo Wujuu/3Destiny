@@ -10,9 +10,6 @@ var Ra       = require('../app/models/ra'),
     });
     var upload = multer({ storage : storage });
     var fs = require('fs');
-    var validUrl = require('valid-url'),
-    im = require('imagemagick-stream');
-    var Thumbbot = require('thumbbot');
     var youtube = require('youtube-validator');
 
 module.exports = function(app, passport) {
@@ -165,6 +162,8 @@ module.exports = function(app, passport) {
         user.local.email    = undefined;
         user.local.password = undefined;
         user.save(function(err) {
+            if(err)
+                return err;
             res.redirect('/profile');
         });
     });
@@ -174,6 +173,8 @@ module.exports = function(app, passport) {
         var user            = req.user;
         user.facebook.token = undefined;
         user.save(function(err) {
+            if(err)
+                return err;
             res.redirect('/profile');
         });
     });
@@ -183,6 +184,8 @@ module.exports = function(app, passport) {
         var user           = req.user;
         user.twitter.token = undefined;
         user.save(function(err) {
+            if(err)
+                return err;
             res.redirect('/profile');
         });
     });
@@ -192,11 +195,14 @@ module.exports = function(app, passport) {
         var user          = req.user;
         user.google.token = undefined;
         user.save(function(err) {
+            if(err)
+                return err;
+                
             res.redirect('/profile');
         });
     });
 
-    app.get('/ra/:id/', isLoggedIn, function(req, res, next){
+    app.get('/ra/:id', isLoggedIn, function(req, res, next){
         if(isNaN(req.params.id)){
             return next();
         }
@@ -207,7 +213,7 @@ module.exports = function(app, passport) {
 
             if(!ra)
                 res.render('ra.ejs', { message: "No existe la RA que estas buscando." });
-                
+             
             res.render('ra.ejs', {
                 'ra' : ra,
                 message : ''
@@ -228,7 +234,7 @@ module.exports = function(app, passport) {
         });
     });
 
-    app.get('/ra/:id/remove'){
+    app.get('/ra/:id/remove', isLoggedIn, function(req, res, next) {
         Ra.remove({'_id':req.params.id, 'userId' : req.user._id}, function(err) {
             // if there are any errors, return the error
             if (err)
@@ -236,7 +242,7 @@ module.exports = function(app, passport) {
         
             res.redirect('/ra/');
         });
-    };
+    });
  
     app.get('/ra/', isLoggedIn, function(req, res){
         Ra.find({'userId' : req.user._id}, function(err, ras) {
@@ -257,14 +263,14 @@ module.exports = function(app, passport) {
     
     app.get('/ra/add/', isLoggedIn, function(req, res) {
         res.render('addRa.ejs', { message: req.flash('addRaMessage') });
-    }).post('/ra/add', isLoggedIn, addRaV, upload.fields([{ name: 'archivo'}, { name: 'patron'}]), function(req, res, next){
+    }).post('/ra/add', isLoggedIn, addRAV, upload.fields([{ name: 'archivo'}, { name: 'patron'}]), function(req, res, next){
         var newRa = new Ra();
         try{
             crearPatron(req.files['patron'][0]);
             newRa.patron = req.files['patron'][0].filename;
             
             if(req.body.tipo != "video"){
-                crearRAImage(req.files['archivo'][0].filename);
+                crearRAImage(req.files['archivo'][0], req.body.tipo);
                 newRa.ruta = req.files['archivo'][0].filename;
                 
             }else{
@@ -290,6 +296,9 @@ module.exports = function(app, passport) {
        
     }).post('/ra/edit', isLoggedIn, editRAV, upload.fields([{ name: 'archivo'}, { name: 'patron'}]), function(req, res, next){
         Ra.find({'_id' : req.body.id}, function(err, ra) {
+            if (err)
+                return res.render('error.ejs', { message: err.message });
+                
             try{
                 if(req.files['patron'][0])
                 {
@@ -303,9 +312,9 @@ module.exports = function(app, passport) {
                 {
                     if(req.files['archivo'][0])
                     {
-                        fs.unlink('../ra/'+ra.tipo+'/'+ra.ruta) 
-                        fs.unlink('../ra/'+ra.tipo+'/thumb/'+ra.ruta)
-                        crearRAImage(req.files['archivo'][0]);
+                        fs.unlink('../ra/'+ra.tipo+'/'+ra.ruta);
+                        fs.unlink('../ra/'+ra.tipo+'/thumb/'+ra.ruta);
+                        crearRAImage(req.files['archivo'][0], req.body.tipo);
                         ra.ruta = req.files['archivo'][0].filename;
                     }
                 }
@@ -352,7 +361,7 @@ function addRAV(req,res,next){
             });
             
         }else{
-            if(!req.files['patron'][0] || if(req.files['archivo'][0])){
+            if(!req.files['patron'][0] || !req.files['archivo'][0]){
                 req.flash('message', 'Por favor cargue algun archivo en RA y Patron');
                 res.redirect('/ra/add');
             }
@@ -389,9 +398,9 @@ function crearPatron(file) {
     fs.unlink(file.path);
 }
 
-function crearRAImage(file) {
+function crearRAImage(file, tipo) {
     // Lo guardo en su carpeta correspondiente.
-    fs.createReadStream(file.path).pipe(fs.createWriteStream('../ra/'+req.body.tipo+'/'+file.filename));
-    fs.createReadStream(file.path).pipe(fs.createWriteStream('../ra/'+req.body.tipo+'/thumb/'+file.filename));
+    fs.createReadStream(file.path).pipe(fs.createWriteStream('../ra/'+tipo+'/'+file.filename));
+    fs.createReadStream(file.path).pipe(fs.createWriteStream('../ra/'+tipo+'/thumb/'+file.filename));
     fs.unlink(file.path);
 }
