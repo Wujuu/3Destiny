@@ -391,7 +391,6 @@ function editRAV(req,res,next){
 function crearPatron(file) {
     // Guardo el patron en la carpeta patron.
     fs.createReadStream(file.path).pipe(fs.createWriteStream('../ra/patron/'+file.filename));
-    fs.createReadStream(file.path).pipe(fs.createWriteStream('../ra/patron/thumb/'+file.filename));
     fs.createReadStream(file.path).pipe(fs.createWriteStream('../public/images/patron/'+file.filename+".jpg"));
     fs.unlink(file.path);
 }
@@ -399,6 +398,5 @@ function crearPatron(file) {
 function crearRAImage(file, tipo) {
     // Lo guardo en su carpeta correspondiente.
     fs.createReadStream(file.path).pipe(fs.createWriteStream('../ra/'+tipo+'/'+file.filename));
-    fs.createReadStream(file.path).pipe(fs.createWriteStream('../ra/'+tipo+'/thumb/'+file.filename));
     fs.unlink(file.path);
 }
