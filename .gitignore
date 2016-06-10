@@ -33,4 +33,10 @@ npm-debug.log
 .css
 *.css
 
+config.js
 
+public/images/patron/*
+ra/img/*
+ra/patron/*
+
+uploads
