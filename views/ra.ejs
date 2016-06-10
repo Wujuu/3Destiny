@@ -20,14 +20,13 @@
     <% if (this.message && message.length > 0) { %>
         <div class="alert alert-danger"><%= message %></div>
     <% }%>
-    <% if (this.ra) { %>
+    <% if (typeof ra == 'object' && ra) { %>
             <p>
                 <strong>id</strong>: <%= ra._id %><br>
                 <strong>tipo</strong>: <%= ra.tipo %><br>
                 <strong>ruta</strong>: <%= ra.ruta %>
                 <strong>patron</strong>: <%= ra.patron %>
             </p>
-        <% } %>
     <% } %>
 
     <hr>
