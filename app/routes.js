@@ -303,7 +303,6 @@ module.exports = function(app, passport) {
                 if(req.files['patron'][0])
                 {
                     fs.unlink('../ra/patron/'+ra.patron);
-                    fs.unlink('../ra/patron/thumb/'+ra.patron);
                     fs.unlink('../public/images/patron/'+ra.patron+".jpg");
                     crearPatron(req.files['patron'][0]);
                     ra.patron = req.files['patron'][0].filename;
@@ -313,7 +312,6 @@ module.exports = function(app, passport) {
                     if(req.files['archivo'][0])
                     {
                         fs.unlink('../ra/'+ra.tipo+'/'+ra.ruta);
-                        fs.unlink('../ra/'+ra.tipo+'/thumb/'+ra.ruta);
                         crearRAImage(req.files['archivo'][0], req.body.tipo);
                         ra.ruta = req.files['archivo'][0].filename;
                     }
