@@ -22,7 +22,7 @@
                 <form action="/ra/edit" method="post" enctype="multipart/form-data">
                     <div class="form-group">
                         <label>Tipo</label>
-                        <select class="form-control" name="tipo">
+                        <select class="form-control" name="tipo" onchange="tipoChange(this)">
                             <option value="img">Imagen</option>
                             <option value="video">Video</option>
                             <option value="3d">3D</option>
@@ -59,7 +59,7 @@
                 <form action="/ra/add" method="post" enctype="multipart/form-data">
                     <div class="form-group">
                         <label>Tipo</label>
-                        <select class="form-control" name="tipo">
+                        <select class="form-control" name="tipo" onchange="tipoChange(this)">
                             <option value="img">Imagen</option>
                             <option value="video">Video</option>
                             <option value="3d">3D</option>
@@ -87,4 +87,25 @@
 
     </div>
 </body>
+
+<script>
+    function tipoChange(select){
+        if(select.selectedOptions[0].value === "video"){
+            var input = document.querySelector("input[type='file']");
+            if(input){
+                input.type="text";
+                input.value="";
+                input.placeholder="Ingrese url de video";
+            }
+        }else{
+            var input = document.querySelector("input[type='text']");
+            if(input){
+                input.type="file";
+                input.value="";
+                input.placeholder="Ingrese url de video";
+            }
+        }
+    }
+    tipoChange(document.querySelector("select[name='tipo']"));
+</script>
 </html>

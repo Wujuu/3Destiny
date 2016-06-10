@@ -38,7 +38,15 @@
                     <td>
                         <img src="/images/patron/<%=ras[i].patron%>.jpg" style="width: 200px;">
                     </td>
-                    <td><%=ras[i].ruta%></td>
+                    <td>
+                        <% if(ras[i].tipo == "img"){ %>
+                            <img src="/images/<%=ras[i].tipo%>/<%=ras[i].ruta%>.jpg" style="width: 200px;">
+                        <% }else if(ras[i].tipo == "video"){ %>
+                            <iframe width="200" height="112.5" src="https://www.youtube.com/embed/<%=ras[i].ruta%>"></iframe>
+                        <% }else if(ras[i].tipo == "3d"){ %>
+                            <%=ras[i].ruta%>
+                        <% } %>
+                    </td>
                 </tr>
             
             </tr>

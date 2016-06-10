@@ -239,11 +239,18 @@ module.exports = function(app, passport) {
                 newRa.ruta = req.files['archivo'][0].filename;
                 
             }else{
-                youtube.validateUrl(req.body.archivo, function(res, err, next) {
+                youtube.validateUrl(req.body.archivo, function(err) {
                     if(err)
-                        next(err);
+                        return res.render('error.ejs', { message: err.message });
                     else
-                        newRa.ruta = req.body.archivo;
+                        var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
+                    	var match = req.body.archivo.match(regExp);
+                    	if (match&&match[7].length==11){
+                    	    var b=match[7];
+                    	    newRa.ruta = b;
+                    	}else{
+                    	    return res.render('error.ejs', { message: "Url incorrecta" });
+                    	}
                 });
             }    
             
@@ -363,5 +370,6 @@ function crearPatron(file) {
 function crearRAImage(file, tipo) {
     // Lo guardo en su carpeta correspondiente.
     fs.createReadStream(file.path).pipe(fs.createWriteStream('../ra/'+tipo+'/'+file.filename));
+    fs.createReadStream(file.path).pipe(fs.createWriteStream('../public/images/'+tipo+'/'+file.filename+".jpg"));
     fs.unlink(file.path);
 }
