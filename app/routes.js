@@ -74,18 +74,6 @@ module.exports = function(app, passport) {
             failureRedirect : '/'
         }));
 
-// twitter --------------------------------
-
-    // send to twitter to do the authentication
-    app.get('/auth/twitter', passport.authenticate('twitter', { scope : 'email' }));
-
-    // handle the callback after twitter has authenticated the user
-    app.get('/auth/twitter/callback',
-        passport.authenticate('twitter', {
-            successRedirect : '/profile',
-            failureRedirect : '/'
-        }));
-
 
 // google ---------------------------------
 
@@ -120,18 +108,6 @@ module.exports = function(app, passport) {
     // handle the callback after facebook has authorized the user
     app.get('/connect/facebook/callback',
         passport.authorize('facebook', {
-            successRedirect : '/profile',
-            failureRedirect : '/'
-        }));
-
-// twitter --------------------------------
-
-    // send to twitter to do the authentication
-    app.get('/connect/twitter', passport.authorize('twitter', { scope : 'email' }));
-
-    // handle the callback after twitter has authorized the user
-    app.get('/connect/twitter/callback',
-        passport.authorize('twitter', {
             successRedirect : '/profile',
             failureRedirect : '/'
         }));
@@ -172,17 +148,6 @@ module.exports = function(app, passport) {
     app.get('/unlink/facebook', isLoggedIn, function(req, res) {
         var user            = req.user;
         user.facebook.token = undefined;
-        user.save(function(err) {
-            if(err)
-                return err;
-            res.redirect('/profile');
-        });
-    });
-
-    // twitter --------------------------------
-    app.get('/unlink/twitter', isLoggedIn, function(req, res) {
-        var user           = req.user;
-        user.twitter.token = undefined;
         user.save(function(err) {
             if(err)
                 return err;
